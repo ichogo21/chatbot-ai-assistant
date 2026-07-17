@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # ============================================
-# CUSTOM CSS - GLASSMORPHISM + GRADIENT
+# CUSTOM CSS
 # ============================================
 st.markdown("""
 <style>
@@ -42,7 +42,6 @@ html, body, [class*="css"] {
 [data-testid="stSidebar"] {
     background: rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
     border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
@@ -52,7 +51,6 @@ h1, h2, h3, h4, h5, h6, p, label, span {
 
 .stButton > button {
     background: rgba(99, 102, 241, 0.3) !important;
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(99, 102, 241, 0.4) !important;
     border-radius: 12px;
     color: #ffffff !important;
@@ -68,7 +66,6 @@ h1, h2, h3, h4, h5, h6, p, label, span {
 
 .stSelectbox > div > div, .stTextInput > div > div, .stNumberInput > div > div {
     background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 12px;
     color: #ffffff !important;
@@ -85,29 +82,6 @@ h1, h2, h3, h4, h5, h6, p, label, span {
 ::-webkit-scrollbar-thumb {
     background: rgba(99, 102, 241, 0.5);
     border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(99, 102, 241, 0.8);
-}
-
-div[data-testid="stHorizontalBlock"] button {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 12px !important;
-    padding: 12px 16px !important;
-    height: auto !important;
-    color: #e0e0e0 !important;
-    font-size: 0.9rem !important;
-    line-height: 1.4 !important;
-    white-space: normal !important;
-    text-align: left !important;
-}
-
-div[data-testid="stHorizontalBlock"] button:hover {
-    background: rgba(99, 102, 241, 0.2) !important;
-    border-color: rgba(99, 102, 241, 0.5) !important;
-    color: #ffffff !important;
 }
 
 [data-testid="stChatMessage"] [data-testid="stChatMessageContent"] {
@@ -127,20 +101,9 @@ div[data-testid="stHorizontalBlock"] button:hover {
 
 [data-testid="stChatInput"] {
     background: rgba(255, 255, 255, 0.08) !important;
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     border-radius: 16px;
     color: #ffffff;
-}
-
-/* Chart container styling */
-.chart-container {
-    background: rgba(15, 15, 30, 0.6) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    padding: 16px;
-    margin-top: 12px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -151,7 +114,7 @@ div[data-testid="stHorizontalBlock"] button:hover {
 try:
     client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 except Exception as e:
-    st.error("⚠️ GROQ_API_KEY tidak ditemukan di environment variables!")
+    st.error("⚠️ GROQ_API_KEY tidak ditemukan!")
     st.stop()
 
 # ============================================
@@ -164,14 +127,14 @@ Gunakan bahasa Indonesia santai (aku/kamu).
 ATURAN WAJIB:
 1. SELALU ingatkan bahwa ini BUKAN financial advice
 2. Jelaskan istilah teknikal dengan analogi simpel:
-   - RSI = "kelelahan harga" (0-30: oversold/lelah jual, 70-100: overbought/lelah beli)
-   - MACD = "persimpangan jalan" (golden cross = jalan lurus, death cross = belok bahaya)
+   - RSI = "kelelahan harga" (0-30: oversold, 70-100: overbought)
+   - MACD = "persimpangan jalan" (golden cross/death cross)
    - Support = "lantai" harga, Resistance = "atap" harga
-   - Volume = "semangat pasar" (volume tinggi = banyak yang ikutan)
+   - Volume = "semangat pasar"
 3. Sebutkan timeframe analisis (1H, 4H, 1D)
 4. Kasih 2 skenario: bullish case & bearish case
 5. Sebutkan level support & resistance kunci
-6. Jangan overconfident — market bisa berubah kapan aja
+6. Jangan overconfident
 
 FORMAT JAWABAN:
 📊 Asset: [nama]
@@ -182,16 +145,13 @@ FORMAT JAWABAN:
 🐻 Bearish Case: [skenario turun + trigger]
 ⚠️ Disclaimer: Bukan saran finansial. DYOR!""",
     
-    "🧑‍💻 Programmer": "Kamu adalah programmer senior yang ramah. Jelaskan konsep coding dengan analogi sederhana. Gunakan bahasa Indonesia santai (aku/kamu). Hindari jargon berlebihan.",
+    "🧑‍💻 Programmer": "Kamu adalah programmer senior yang ramah. Jelaskan konsep coding dengan analogi sederhana. Gunakan bahasa Indonesia santai.",
     
-    "🎬 Kreator Konten": "Kamu adalah kreator konten kreatif. Berikan ide konten, script, atau tips viral dengan gaya santai dan engaging. Bahasa Indonesia gaul tapi tetap sopan.",
+    "🎬 Kreator Konten": "Kamu adalah kreator konten kreatif. Berikan ide konten, script, atau tips viral dengan gaya santai. Bahasa Indonesia gaul tapi tetap sopan.",
     
-    "🤙 Teman Ngobrol": "Kamu adalah teman ngobrol santai. Jawab dengan gaya conversational, pakai bahasa Indonesia sehari-hari, dan sesekali kasih emoji. Jangan terlalu formal."
+    "🤙 Teman Ngobrol": "Kamu adalah teman ngobrol santai. Jawab dengan gaya conversational, pakai bahasa Indonesia sehari-hari, dan sesekali kasih emoji."
 }
 
-# ============================================
-# MODEL OPTIONS
-# ============================================
 MODELS = {
     "⚡ Llama 3.1 8B (Cepat)": "llama-3.1-8b-instant",
     "🧠 Llama 3.3 70B (Pintar)": "llama-3.3-70b-versatile",
@@ -202,9 +162,7 @@ MODELS = {
 # ============================================
 # FUNGSI CHART
 # ============================================
-
 def create_candlestick_chart(df, coin_name="Bitcoin"):
-    """Buat chart candlestick interaktif pakai Plotly"""
     fig = make_subplots(
         rows=2, cols=1, 
         shared_xaxes=True,
@@ -262,7 +220,6 @@ def create_candlestick_chart(df, coin_name="Bitcoin"):
     return fig
 
 def create_price_chart(df, coin_name="Bitcoin"):
-    """Buat line chart harga simpel"""
     fig = go.Figure()
     
     fig.add_trace(
@@ -324,11 +281,8 @@ if "ohlc_data" not in st.session_state:
 if "chart_data" not in st.session_state:
     st.session_state.chart_data = None
 
-if "pending_chart" not in st.session_state:
-    st.session_state.pending_chart = None
-
 # ============================================
-# SIDEBAR - TAB PENGATURAN & MARKET
+# SIDEBAR
 # ============================================
 tab1, tab2 = st.sidebar.tabs(["⚙️ Pengaturan", "📊 Market"])
 
@@ -372,12 +326,11 @@ with tab1:
         st.session_state.market_data = None
         st.session_state.ohlc_data = None
         st.session_state.chart_data = None
-        st.session_state.pending_chart = None
         st.rerun()
 
 with tab2:
     st.markdown("### 📈 Data Real-Time")
-    st.caption("Data langsung dari CoinGecko — gratis & real-time")
+    st.caption("Data langsung dari CoinGecko")
     
     coin_list = get_coin_list()
     coin_names = list(coin_list.keys())
@@ -388,7 +341,7 @@ with tab2:
     col1, col2 = st.columns(2)
     with col1:
         if st.button("🔄 Refresh Harga", use_container_width=True):
-            with st.spinner("Mengambil data dari CoinGecko..."):
+            with st.spinner("Mengambil data..."):
                 data = get_crypto_price(selected_id)
                 ohlc_data = get_coin_ohlc(selected_id, days=7)
                 chart_data = get_coin_market_chart(selected_id, days=7)
@@ -397,20 +350,6 @@ with tab2:
                     st.session_state.market_data = data
                     st.session_state.ohlc_data = ohlc_data if "error" not in ohlc_data else None
                     st.session_state.chart_data = chart_data if "error" not in chart_data else None
-                    
-                    # Simpan chart yang akan ditampilkan setelah AI response
-                    if st.session_state.ohlc_data is not None:
-                        st.session_state.pending_chart = {
-                            "type": "candlestick",
-                            "data": st.session_state.ohlc_data,
-                            "name": selected_name
-                        }
-                    elif st.session_state.chart_data is not None:
-                        st.session_state.pending_chart = {
-                            "type": "line",
-                            "data": st.session_state.chart_data,
-                            "name": selected_name
-                        }
                     
                     change_emoji = "🟢" if data['change_24h'] >= 0 else "🔴"
                     change_sign = "+" if data['change_24h'] >= 0 else ""
@@ -428,14 +367,14 @@ Berdasarkan data di atas, analisis teknikal {data['symbol'].upper()} gimana?"""
                     st.session_state.messages.append({"role": "user", "content": market_msg})
                     st.rerun()
                 else:
-                    st.error(f"❌ Gagal ambil data: {data['error']}")
+                    st.error(f"❌ Gagal: {data['error']}")
     
     with col2:
-        if st.button("🔥 Trending Coins", use_container_width=True):
-            with st.spinner("Mengambil trending..."):
+        if st.button("🔥 Trending", use_container_width=True):
+            with st.spinner("Mengambil..."):
                 trending = get_trending_coins()
                 if "error" not in trending:
-                    trend_msg = "🔥 Crypto yang lagi trending hari ini:\n\n"
+                    trend_msg = "🔥 Crypto trending hari ini:\n\n"
                     for i, coin in enumerate(trending, 1):
                         trend_msg += f"{i}. **{coin['name']}** ({coin['symbol']}) — Rank #{coin['market_cap_rank']}\n"
                     trend_msg += "\nKasih analisis singkat untuk 3 coin teratas dong!"
@@ -445,7 +384,6 @@ Berdasarkan data di atas, analisis teknikal {data['symbol'].upper()} gimana?"""
                 else:
                     st.error(f"❌ Error: {trending['error']}")
     
-    # Tampilkan data terakhir (ringkas saja di sidebar)
     if st.session_state.market_data:
         d = st.session_state.market_data
         change_sign = "+" if d['change_24h'] >= 0 else ""
@@ -461,24 +399,18 @@ Berdasarkan data di atas, analisis teknikal {data['symbol'].upper()} gimana?"""
         
         st.caption(f"📡 Source: {d['source']} | ⏰ {d['last_updated'][:19]}")
     
-    # Input manual fallback
-    with st.expander("📝 Input Data Manual (dari TradingView)"):
-        st.caption("Kalau CoinGecko error atau mau analisis forex/stock")
+    with st.expander("📝 Input Manual"):
+        st.caption("Dari TradingView")
         
         col1, col2 = st.columns(2)
         with col1:
             manual_asset = st.text_input("Asset", value="BTC/USDT", key="manual_asset")
         with col2:
-            manual_tf = st.selectbox(
-                "Timeframe",
-                ["1m", "5m", "15m", "1H", "4H", "1D", "1W"],
-                index=3,
-                key="manual_tf"
-            )
+            manual_tf = st.selectbox("Timeframe", ["1m", "5m", "15m", "1H", "4H", "1D", "1W"], index=3, key="manual_tf")
         
-        manual_price = st.number_input("Harga Sekarang ($)", value=0.0, step=0.01, key="manual_price")
+        manual_price = st.number_input("Harga ($)", value=0.0, step=0.01, key="manual_price")
         
-        with st.expander("📉 Indikator Teknikal"):
+        with st.expander("📉 Indikator"):
             col_rsi, col_macd = st.columns(2)
             with col_rsi:
                 manual_rsi = st.number_input("RSI", min_value=0, max_value=100, value=50, key="manual_rsi")
@@ -491,7 +423,7 @@ Berdasarkan data di atas, analisis teknikal {data['symbol'].upper()} gimana?"""
             with col_res:
                 manual_res = st.number_input("Resistance ($)", value=0.0, step=0.01, key="manual_res")
         
-        if st.button("🚀 Analisis Manual", use_container_width=True, key="manual_btn"):
+        if st.button("🚀 Analisis", use_container_width=True, key="manual_btn"):
             manual_context = f"""Data Market {manual_asset} ({manual_tf}):
 💰 Harga: ${manual_price:,.2f}"""
             if manual_rsi != 50:
@@ -546,48 +478,49 @@ if not st.session_state.messages:
 # TAMPILKAN CHAT HISTORY + CHART
 # ============================================
 
-# Cek apakah ada chart pending yang harus ditampilkan setelah AI response
-last_message_is_ai = False
+# Cek apakah ada message baru dari user yang perlu AI response
+needs_ai_response = False
 if len(st.session_state.messages) > 0:
-    last_message_is_ai = st.session_state.messages[-1]["role"] == "assistant"
+    last_msg = st.session_state.messages[-1]
+    if last_msg["role"] == "user":
+        needs_ai_response = True
 
+# Tampilkan semua chat history (termasuk chart yang sudah ada)
 for i, message in enumerate(st.session_state.messages):
     avatar = "🧑" if message["role"] == "user" else "🤖"
     
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
     
-    # Tampilkan chart setelah AI response (bukan setelah user message)
-    # dan hanya jika ini adalah pesan AI terakhir dan ada pending chart
-    if message["role"] == "assistant" and i == len(st.session_state.messages) - 1:
-        if st.session_state.pending_chart:
+    # Tampilkan chart setelah AI response yang memiliki data chart
+    # Kita cek apakah message AI ini adalah response terakhir dan kita punya chart data
+    if message["role"] == "assistant" and i == len(st.session_state.messages) - 1 and not needs_ai_response:
+        # Tampilkan chart di main area setelah AI response terakhir
+        if st.session_state.ohlc_data is not None:
             st.markdown("---")
-            st.markdown("### 📊 Chart Analisis")
+            st.markdown("### 📊 Chart 7 Hari")
             
-            chart_info = st.session_state.pending_chart
+            fig = create_candlestick_chart(
+                st.session_state.ohlc_data, 
+                coin_name=selected_name
+            )
+            st.plotly_chart(fig, use_container_width=True, key=f"chart_candle_main_{i}")
+            st.caption("💡 Hover/scroll untuk zoom. Hijau = naik, Merah = turun.")
+        
+        elif st.session_state.chart_data is not None:
+            st.markdown("---")
+            st.markdown("### 📈 Price Chart 7 Hari")
             
-            if chart_info["type"] == "candlestick":
-                fig = create_candlestick_chart(
-                    chart_info["data"], 
-                    coin_name=chart_info["name"]
-                )
-                st.plotly_chart(fig, use_container_width=True, key=f"chart_candle_{i}")
-                st.caption("💡 Hover/scroll untuk zoom. Hijau = naik, Merah = turun.")
-            
-            elif chart_info["type"] == "line":
-                fig = create_price_chart(
-                    chart_info["data"],
-                    coin_name=chart_info["name"]
-                )
-                st.plotly_chart(fig, use_container_width=True, key=f"chart_line_{i}")
-            
-            # Reset pending chart setelah ditampilkan
-            st.session_state.pending_chart = None
+            fig = create_price_chart(
+                st.session_state.chart_data,
+                coin_name=selected_name
+            )
+            st.plotly_chart(fig, use_container_width=True, key=f"chart_line_main_{i}")
 
 # ============================================
-# AI RESPONSE (kalau user baru kirim pesan)
+# AI RESPONSE (streaming)
 # ============================================
-if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "user":
+if needs_ai_response:
     with st.chat_message("assistant", avatar="🤖"):
         message_placeholder = st.empty()
         full_response = ""
@@ -613,32 +546,12 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
                     message_placeholder.markdown(full_response + "▌")
             
             message_placeholder.markdown(full_response)
+            
+            # Simpan AI response
             st.session_state.messages.append({"role": "assistant", "content": full_response})
             
-            # Tampilkan chart setelah AI selesai merespons
-            if st.session_state.pending_chart:
-                st.markdown("---")
-                st.markdown("### 📊 Chart Analisis")
-                
-                chart_info = st.session_state.pending_chart
-                
-                if chart_info["type"] == "candlestick":
-                    fig = create_candlestick_chart(
-                        chart_info["data"], 
-                        coin_name=chart_info["name"]
-                    )
-                    st.plotly_chart(fig, use_container_width=True, key="chart_candle_main")
-                    st.caption("💡 Hover/scroll untuk zoom. Hijau = naik, Merah = turun.")
-                
-                elif chart_info["type"] == "line":
-                    fig = create_price_chart(
-                        chart_info["data"],
-                        coin_name=chart_info["name"]
-                    )
-                    st.plotly_chart(fig, use_container_width=True, key="chart_line_main")
-                
-                # Reset pending chart
-                st.session_state.pending_chart = None
+            # Tampilkan chart setelah AI selesai (tapi di rerun berikutnya)
+            # Chart akan otomatis muncul di loop di atas karena sekarang messages[-1] adalah assistant
             
             st.rerun()
             
