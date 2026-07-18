@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import requests
 from groq import Groq
 from datetime import datetime
 from market_data import get_crypto_price, get_trending_coins, get_coin_list, get_coin_ohlc, get_coin_market_chart
@@ -372,6 +373,125 @@ def render_price_ticker(coin_id, coin_name):
     """, unsafe_allow_html=True)
 
 # ============================================
+# FEAR & GREED INDEX + FUNDING RATE
+# ============================================
+@st.cache_data(ttl=300, show_spinner=False)
+def get_fear_greed_index():
+    """Sentimen market crypto secara keseluruhan (alternative.me), update harian jadi cache 5 menit cukup."""
+    try:
+        response = requests.get("https://api.alternative.me/fng/?limit=1", timeout=5)
+        data = response.json()
+        latest = data["data"][0]
+        return {
+            "value": int(latest["value"]),
+            "classification": latest["value_classification"]
+        }
+    except Exception:
+        return None
+
+@st.cache_data(ttl=60, show_spinner=False)
+def get_funding_rate(futures_symbol):
+    """Funding rate futures dari Binance, contoh symbol: BTCUSDT."""
+    try:
+        response = requests.get(
+            "https://fapi.binance.com/fapi/v1/premiumIndex",
+            params={"symbol": futures_symbol},
+            timeout=5
+        )
+        data = response.json()
+        if "lastFundingRate" in data:
+            return float(data["lastFundingRate"]) * 100
+        return None
+    except Exception:
+        return None
+
+def render_sentiment_row(coin_symbol):
+    fg = get_fear_greed_index()
+    futures_symbol = f"{coin_symbol.upper()}USDT"
+    funding = get_funding_rate(futures_symbol)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if fg:
+            fg_labels_id = {
+                "Extreme Fear": "Ketakutan Ekstrem",
+                "Fear": "Ketakutan",
+                "Neutral": "Netral",
+                "Greed": "Keserakahan",
+                "Extreme Greed": "Keserakahan Ekstrem"
+            }
+            label_id = fg_labels_id.get(fg["classification"], fg["classification"])
+
+            if fg["value"] <= 25:
+                fg_color = "#ef4444"
+            elif fg["value"] <= 45:
+                fg_color = "#f97316"
+            elif fg["value"] <= 55:
+                fg_color = "#f0b429"
+            elif fg["value"] <= 75:
+                fg_color = "#84cc16"
+            else:
+                fg_color = "#22c55e"
+
+            st.markdown(f"""
+            <div style="
+                background: #0d0f14;
+                border: 1px solid rgba(240, 180, 41, 0.15);
+                border-radius: 6px;
+                padding: 14px 20px;
+                margin: 0 0 24px 0;
+                height: 88px;
+            ">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 1px; margin-bottom: 6px;">
+                    😨 FEAR &amp; GREED INDEX
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 10px;">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 1.7rem; font-weight: 700; color: {fg_color};">{fg['value']}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 0.9rem; font-weight: 600; color: {fg_color};">{label_id}</span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div style="background: #0d0f14; border: 1px solid rgba(240, 180, 41, 0.15); border-radius: 6px; padding: 14px 20px; margin: 0 0 24px 0; height: 88px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem;">
+                ⚠️ Fear &amp; Greed Index nggak bisa dimuat
+            </div>
+            """, unsafe_allow_html=True)
+
+    with col2:
+        if funding is not None:
+            f_color = "#22c55e" if funding >= 0 else "#ef4444"
+            f_note = "Long bayar Short (market cenderung greedy)" if funding >= 0 else "Short bayar Long (market cenderung takut)"
+
+            st.markdown(f"""
+            <div style="
+                background: #0d0f14;
+                border: 1px solid rgba(240, 180, 41, 0.15);
+                border-radius: 6px;
+                padding: 14px 20px;
+                margin: 0 0 24px 0;
+                height: 88px;
+            ">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 1px; margin-bottom: 6px;">
+                    ⚖️ FUNDING RATE ({futures_symbol})
+                </div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 1.7rem; font-weight: 700; color: {f_color};">
+                    {funding:+.4f}%
+                </div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 2px;">
+                    {f_note}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div style="background: #0d0f14; border: 1px solid rgba(240, 180, 41, 0.15); border-radius: 6px; padding: 14px 20px; margin: 0 0 24px 0; height: 88px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.45); font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; text-align: center;">
+                ⚠️ Funding rate {futures_symbol} nggak tersedia (mungkin belum listed di Binance Futures)
+            </div>
+            """, unsafe_allow_html=True)
+
+# ============================================
 # SESSION STATE
 # ============================================
 if "messages" not in st.session_state:
@@ -569,6 +689,13 @@ st.markdown("""
 # LIVE PRICE TICKER (tampil di atas, ikut crypto yang dipilih di sidebar)
 # ============================================
 render_price_ticker(selected_id, selected_name)
+
+# ============================================
+# FEAR & GREED INDEX + FUNDING RATE (ikut crypto yang dipilih)
+# ============================================
+_ticker_snapshot = get_ticker_snapshot(selected_id)
+if _ticker_snapshot and "error" not in _ticker_snapshot:
+    render_sentiment_row(_ticker_snapshot["symbol"])
 
 # ============================================
 # QUICK PROMPTS
